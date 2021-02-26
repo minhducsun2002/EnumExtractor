@@ -21,7 +21,8 @@ namespace EnumExtractor
                     var enums = type.NestedTypes.Where(field => field.IsEnum).ToArray();
                     if (enums.Length == 0) continue;
                     
-                    var @class = SyntaxFactory.ClassDeclaration(type.Name); // class declaration
+                    var @class = SyntaxFactory.ClassDeclaration(type.Name)
+                        .AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword)); // class declaration
                     foreach (var @enum in enums)
                     {
                         var enumDeclaration = SyntaxFactory.EnumDeclaration(@enum.Name);    // enum declaration
