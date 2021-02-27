@@ -46,7 +46,7 @@ namespace EnumExtractor
                         @class = @class.AddMembers(enumDeclaration.WithModifiers(new SyntaxTokenList {SyntaxFactory.Token(SyntaxKind.PublicKeyword)}));
                     }
                     
-                    @namespace = @namespace.AddMembers(@class); // adding class member to namespace
+                    @namespace = @namespace.AddMembers(@class.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))); // adding class member to namespace
                 }
             
             Console.WriteLine(@namespace.NormalizeWhitespace().ToFullString());
