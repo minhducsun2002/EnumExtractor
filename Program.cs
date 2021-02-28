@@ -43,7 +43,7 @@ namespace EnumExtractor
                         }
 
                         // adding enum field to class
-                        @class = @class.AddMembers(enumDeclaration.WithModifiers(new SyntaxTokenList {SyntaxFactory.Token(SyntaxKind.PublicKeyword)}));
+                        @class = @class.AddMembers(enumDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword)));
                     }
                     
                     @namespace = @namespace.AddMembers(@class.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))); // adding class member to namespace
