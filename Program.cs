@@ -15,14 +15,17 @@ namespace EnumExtractor
             var @namespace = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName("FgoExportedConstants"));
 
             foreach (var type in loadedModule.Types.OrderBy(type => type.Name))
-                // static classes
-                if (type.IsClass && type.IsSealed && type.IsAbstract && !type.FullName.Contains('.'))
+                if (
+                    type.IsClass && !type.FullName.Contains('.')
+                    && (type.IsAbstract && type.IsSealed || type.Name.Contains("Entity"))
+                )
                 {
                     var enums = type.NestedTypes.Where(field => field.IsEnum).ToArray();
                     if (enums.Length == 0) continue;
-                    
-                    var @class = SyntaxFactory.ClassDeclaration(type.Name)
-                        .AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword)); // class declaration
+
+                    var @class = SyntaxFactory.ClassDeclaration(type.Name);
+                    if (type.IsAbstract && type.IsSealed) // static keyword
+                        @class = @class.AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword)); // class declaration
                     foreach (var @enum in enums)
                     {
                         var enumDeclaration = SyntaxFactory.EnumDeclaration(@enum.Name);    // enum declaration
@@ -30,9 +33,19 @@ namespace EnumExtractor
                         {
                             var name = enumValue.Name;
                             var value = enumValue.Constant;
+                            SyntaxToken valueToken;
+                            try
+                            {
+                                valueToken = SyntaxFactory.Literal((int) value);
+                            }
+                            catch
+                            {
+                                valueToken = SyntaxFactory.Literal((long) value);
+                            }
+                            
                             var valueExpression = SyntaxFactory.EqualsValueClause(SyntaxFactory.LiteralExpression(
                                 SyntaxKind.NumericLiteralExpression,
-                                SyntaxFactory.Literal((int) value)
+                                valueToken
                             ));
                             var enumMember = SyntaxFactory.EnumMemberDeclaration(
                                     new SyntaxList<AttributeListSyntax>(),
