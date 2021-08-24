@@ -28,7 +28,8 @@ namespace EnumExtractor
                         @class = @class.AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword)); // class declaration
                     foreach (var @enum in enums)
                     {
-                        var enumDeclaration = SyntaxFactory.EnumDeclaration(@enum.Name);    // enum declaration
+                        var enumDeclaration = SyntaxFactory.EnumDeclaration(@enum.Name); // enum declaration
+                        bool hasLong = false;
                         foreach (var enumValue in @enum.Fields.Where(e => e.Name != "value__"))
                         {
                             var name = enumValue.Name;
@@ -41,6 +42,7 @@ namespace EnumExtractor
                             catch
                             {
                                 valueToken = SyntaxFactory.Literal((long) value);
+                                hasLong = true;
                             }
                             
                             var valueExpression = SyntaxFactory.EqualsValueClause(SyntaxFactory.LiteralExpression(
@@ -55,6 +57,11 @@ namespace EnumExtractor
                             enumDeclaration = enumDeclaration.AddMembers(enumMember);   // adding enum values
                         }
 
+                        if (hasLong)
+                            enumDeclaration = enumDeclaration.AddBaseListTypes(
+                                SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("long"))
+                            );
+                        
                         // adding enum field to class
                         @class = @class.AddMembers(enumDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword)));
                     }
